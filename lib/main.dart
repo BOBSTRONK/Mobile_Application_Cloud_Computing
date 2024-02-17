@@ -1,4 +1,6 @@
+import 'package:chatapp_firebase/pages/home.dart';
 import 'package:chatapp_firebase/pages/signin.dart';
+import 'package:chatapp_firebase/pages/signup.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -26,7 +28,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: const SingIn(),
+      home: Home(),
     );
   }
 }
