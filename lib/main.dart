@@ -2,9 +2,12 @@ import 'package:chatapp_firebase/pages/chatpage.dart';
 import 'package:chatapp_firebase/pages/home.dart';
 import 'package:chatapp_firebase/pages/signin.dart';
 import 'package:chatapp_firebase/pages/signup.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 
@@ -29,7 +32,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: ChatPage(),
+      home: SignUp(),
     );
   }
 }
