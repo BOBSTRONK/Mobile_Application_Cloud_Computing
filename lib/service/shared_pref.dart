@@ -1,6 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPreferenceHelper {
+  // all of these variables is going to be changed by sharedPreference package later
   static String userIdKey = "USERKEY";
   static String userNamekey = "USERNAMEKEY";
   static String userEmailKey = "USEREMAILKEY";

@@ -16,4 +16,15 @@ class DatabaseMethods {
         .where("E-mail", isEqualTo: email)
         .get();
   }
+
+  // return the query from "user" Collection in the firebase
+  // where all document that has the "SearchKey" corresponding to the
+  // first letter that user have inserted into the textfield
+  Future<QuerySnapshot> Search(String username) async {
+    print("query $username");
+    return await FirebaseFirestore.instance
+        .collection("users")
+        .where("SearchKey", isEqualTo: username.substring(0, 1).toUpperCase())
+        .get();
+  }
 }

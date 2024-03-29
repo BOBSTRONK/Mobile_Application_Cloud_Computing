@@ -31,12 +31,17 @@ class _SignUpState extends State<SignUp> {
             .createUserWithEmailAndPassword(email: email!, password: password!);
 
         String Id = randomAlphaNumeric(10);
+        String user = emailController.text.replaceAll("@gmail.com", "");
+        String updateUserName =
+            user.replaceFirst(user[0], user[0].toUpperCase());
+        String firstletter = user.substring(0, 1).toUpperCase();
 
         // upload the user data to cloud firestore
         Map<String, dynamic> userInfoMap = {
           "Name": nameController.text,
           "E-mail": emailController.text,
-          "username": emailController.text.replaceAll("@gmail.com", ""),
+          "username": updateUserName.toUpperCase(),
+          "SearchKey": firstletter,
           "Photo":
               "https://w7.pngwing.com/pngs/340/946/png-transparent-avatar-user-computer-icons-software-developer-avatar-child-face-heroes.png",
           "ID": Id,
