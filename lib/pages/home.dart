@@ -1,5 +1,6 @@
 import 'package:chatapp_firebase/pages/chatpage.dart';
 import 'package:chatapp_firebase/service/database.dart';
+import 'package:chatapp_firebase/service/shared_pref.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +21,39 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   // to indicate the status of search bar
   bool search = false;
+  String? myName, myProfilePic, myUserName, myEmail;
+
+  @override
+  void initState() {
+    super.initState();
+    onTheLoad();
+  }
+
+  getTheSharedPref() async {
+    myName = await SharedPreferenceHelper().getUserDisplayName();
+    myProfilePic = await SharedPreferenceHelper().getUserPic();
+    myUserName = await SharedPreferenceHelper().getUserName();
+    myEmail = await SharedPreferenceHelper().getUserEmail();
+    setState(() {});
+  }
+
+  onTheLoad() async {
+    await getTheSharedPref();
+    setState(() {});
+  }
+
+  // create a unique chatrooms for each specific user we want to have a chat
+  // Compare the first letter of string A and string b
+  // EXAMPLE: Alice and BOB
+  // Alice --> A --> 65; Bob --> B --> 66
+  // 65 < 66 --> Alice\_Bob
+  getChatRoomIdByUsername(String a, String b) {
+    if (a.substring(0, 1).codeUnitAt(0) > b.substring(0, 1).codeUnitAt(0)) {
+      return "$b\_$a";
+    } else {
+      return "$a\_$b";
+    }
+  }
 
   var queryResultSet = [];
   var tempSearchStore = [];
@@ -147,12 +181,7 @@ class _HomeState extends State<Home> {
                         : Column(
                             children: [
                               GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => ChatPage()));
-                                },
+                                onTap: () {},
                                 child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -222,53 +251,75 @@ class _HomeState extends State<Home> {
   }
 
   Widget buildResultCard(data) {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 8),
-      child: Material(
-        elevation: 5.0,
-        borderRadius: BorderRadius.circular(10),
-        child: Container(
-            padding: EdgeInsets.all(18),
-            child: Row(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(60),
-                  child: Image.network(
-                    data["Photo"],
-                    height: 50,
-                    width: 50,
-                    fit: BoxFit.cover,
+    return GestureDetector(
+      onTap: () async {
+        // back to the home screen without begin in the search page
+        setState(() {
+          search = false;
+        });
+        var chatRoomId = getChatRoomIdByUsername(myUserName!, data["username"]);
+        Map<String, dynamic> chatRoomInfoMap = {
+          "user": [myUserName, data["username"]],
+        };
+        await DatabaseMethods().CreateChatRoom(chatRoomId, chatRoomInfoMap);
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => ChatPage(
+                      name: data["Name"],
+                      profileUrl: data["Photo"],
+                      userName: data["username"],
+                    )));
+      },
+      child: Container(
+        margin: EdgeInsets.symmetric(vertical: 8),
+        child: Material(
+          elevation: 5.0,
+          borderRadius: BorderRadius.circular(10),
+          child: Container(
+              padding: EdgeInsets.all(18),
+              child: Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(60),
+                    child: Image.network(
+                      data["Photo"],
+                      height: 50,
+                      width: 50,
+                      fit: BoxFit.cover,
+                    ),
                   ),
-                ),
-                SizedBox(
-                  width: 20,
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      data["Name"],
-                      style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18),
-                    ),
-                    SizedBox(
-                      height: 5.0,
-                    ),
-                    Text(
-                      data["username"],
-                      style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold),
-                    )
-                  ],
-                )
-              ],
-            ),
-            decoration: BoxDecoration(
-                color: Colors.white, borderRadius: BorderRadius.circular(10))),
+                  SizedBox(
+                    width: 20,
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        data["Name"],
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18),
+                      ),
+                      SizedBox(
+                        height: 5.0,
+                      ),
+                      Text(
+                        data["username"],
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold),
+                      )
+                    ],
+                  )
+                ],
+              ),
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10))),
+        ),
       ),
     );
   }
